@@ -14,11 +14,12 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         Setting::create([
-            'app_name' => 'NiceAdmin Laravel',
-            'copyright' => 'Tamus Tahir | 2026',
-            'login_title' => 'Halaman Login',
-            'keywords' => 'admin, dashboard, laravel, niceadmin, bootstrap',
-            'description' => 'Aplikasi dashboard admin menggunakan Laravel dan NiceAdmin template.',
+            'app_name' => 'TailorPro',
+            'copyright' => 'TailorPro | 2026',
+            'login_title' => 'Portal Tailor',
+            'keywords' => 'tailor, penjahit, manajemen produksi, pesanan pakaian',
+            'description' => 'Sistem Manajemen Produksi dan Pelanggan untuk Usaha Tailor Premium.',
+            'logo' => 'logo.png',
         ]);
     }
 }

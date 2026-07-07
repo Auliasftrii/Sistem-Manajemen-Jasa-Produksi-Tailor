@@ -26,12 +26,12 @@
                     },
                     colors: {
                         brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb', // Matches the modern blue theme
-                            700: '#1d4ed8',
-                            900: '#1e3a8a',
+                            50: '#fdf8f5',
+                            100: '#f8ede7',
+                            500: '#b08362',
+                            600: '#8b5a2b', // Tailor elegant brown
+                            700: '#6f441d',
+                            900: '#4a2b0f',
                         }
                     }
                 }
@@ -51,12 +51,12 @@
     <div class="min-h-screen flex">
         <!-- Left Side: Visual / Branding (Hidden on mobile) -->
         <div class="hidden lg:flex lg:w-1/2 relative bg-brand-900 overflow-hidden items-center justify-center">
-            <!-- Abstract Background Image -->
-            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
-                class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" alt="Background">
+            <!-- Tailor Background Image -->
+            <img src="https://images.unsplash.com/photo-1598032895393-272e5058c422?q=80&w=2564&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay" alt="Background">
 
             <!-- Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br from-brand-600/80 to-brand-900/90"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-600/80 to-brand-900/95"></div>
 
             <!-- Branding Content -->
             <div class="relative z-10 p-12 text-center text-white max-w-lg">

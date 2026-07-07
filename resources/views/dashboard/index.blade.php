@@ -101,13 +101,13 @@
                         type: 'area',
                         toolbar: { show: false },
                     },
-                    colors: ['#2eca6a'],
+                    colors: ['#8B5A2B'], // Tailor Brown/Gold
                     fill: {
                         type: "gradient",
                         gradient: {
                             shadeIntensity: 1,
-                            opacityFrom: 0.3,
-                            opacityTo: 0.4,
+                            opacityFrom: 0.4,
+                            opacityTo: 0.1,
                             stops: [0, 90, 100]
                         }
                     },

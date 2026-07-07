@@ -40,12 +40,14 @@
     <style>
         :root {
             /* ====== UBAH WARNA TEMA DI SINI ====== */
-            --theme-bg: #000080;
-            --theme-hover: #020260;
-            /* warna lebih gelap untuk efek hover */
-            --theme-text: #ffffff;
-            --main-bg: #eeeeee;
-            /* warna background utama / halaman */
+            --theme-bg: #5C4033;
+            /* Coklat Tua */
+            --theme-hover: #3E2A21;
+            /* Coklat Lebih Gelap untuk efek hover */
+            --theme-text: #FDFBF7;
+            /* Krem Terang / Putih */
+            --main-bg: #F5F5DC;
+            /* Krem Halus untuk background halaman */
             /* ===================================== */
         }
 
@@ -104,6 +106,7 @@
 
         .header .dropdown-menu .dropdown-item:hover {
             background-color: var(--theme-hover) !important;
+            color: var(--theme-text) !important;
         }
 
         .header .dropdown-divider {
@@ -279,7 +282,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('customer.*') ? '' : 'collapsed' }}"
                     href="{{ route('customer.index') }}">
-                    <i class='bx bx-user-circle'></i>
+                    <i class='bx bx-group'></i>
                     <span>Pelanggan</span>
                 </a>
             </li>
@@ -287,7 +290,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('order.*') ? '' : 'collapsed' }}"
                     href="{{ route('order.index') }}">
-                    <i class='bx bx-cart'></i>
+                    <i class='bx bx-shopping-bag'></i>
                     <span>Pesanan</span>
                 </a>
             </li>
@@ -295,7 +298,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('production.*') ? '' : 'collapsed' }}"
                     href="{{ route('production.index') }}">
-                    <i class='bx bx-list-check'></i>
+                    <i class='bx bx-cut'></i>
                     <span>Pelacakan Produksi</span>
                 </a>
             </li>
@@ -303,7 +306,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('payment.*') ? '' : 'collapsed' }}"
                     href="{{ route('payment.index') }}">
-                    <i class='bx bx-credit-card'></i>
+                    <i class='bx bx-wallet'></i>
                     <span>Pembayaran</span>
                 </a>
             </li>
@@ -311,7 +314,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('report.*') ? '' : 'collapsed' }}"
                     href="{{ route('report.index') }}">
-                    <i class='bx bx-file'></i>
+                    <i class='bx bx-file-blank'></i>
                     <span>Laporan</span>
                 </a>
             </li>
@@ -319,7 +322,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('setting.*') ? '' : 'collapsed' }}"
                     href="{{ route('setting.index') }}">
-                    <i class='bx bx-cog'></i>
+                    <i class='bx bx-slider-alt'></i>
                     <span>Setting</span>
                 </a>
             </li>
