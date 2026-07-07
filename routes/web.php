@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/customer', App\Http\Controllers\CustomerController::class);
     Route::resource('/order', App\Http\Controllers\OrderController::class);
     Route::resource('/production', App\Http\Controllers\ProductionTrackingController::class)->only(['index', 'edit', 'update']);
+    Route::get('/payment/{order}/print', [App\Http\Controllers\PaymentController::class, 'print'])->name('payment.print');
+    Route::resource('/payment', App\Http\Controllers\PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
 
     Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
     Route::put('/setting/{setting}/update', [SettingController::class, 'update'])->name('setting.update');
