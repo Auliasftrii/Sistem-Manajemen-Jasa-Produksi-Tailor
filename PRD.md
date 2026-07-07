@@ -59,22 +59,37 @@ Sistem ini dibangun menggunakan kerangka kerja (framework) **Laravel 11** dengan
 
 **Skema Basis Data utama terdiri dari entitas berikut:**
 1. **Users (`users`)**: Menyimpan data kredensial pegawai dan admin. Tabel ini memiliki kolom `role` untuk membedakan hak akses.
-2. **Customers (`customers`)**: Menyimpan identitas pelanggan. Karena ukuran badan bisa bervariasi antar pelanggan dan jenis pakaian, atribut ukuran disimpan dalam format JSON pada kolom `measurements` untuk fleksibilitas.
+2. **Customers (`customers`)**: Menyimpan identitas pelanggan (Nama, No HP, Alamat).
 3. **Orders (`orders`)**: Tabel induk untuk transaksi pesanan. Terhubung dengan `customers` dan `users` (admin yang melayani). Berisi total tagihan, tanggal pesanan, dan tanggal target selesai.
 4. **Order Items (`order_items`)**: Tabel detail dari pesanan. Satu pesanan dapat memiliki banyak pakaian. Menyimpan jenis pakaian, detail kain, kuantitas, dan harga satuan.
 5. **Payments (`payments`)**: Melacak riwayat pembayaran dari sebuah pesanan. Satu pesanan bisa dicicil (DP dan Pelunasan).
-6. **Production Trackings (`production_trackings`)**: Tabel log tahapan produksi. Setiap kali status pakaian berpindah (misal: dari pemotongan ke penjahitan), log akan dicatat beserta penjahit (`handled_by`) yang mengerjakannya dan timestamp-nya.
+6. **Production Trackings (`production_trackings`)**: Tabel log tahapan produksi. Setiap kali status pakaian berpindah, log akan dicatat beserta penjahit (`tailor_id`) yang mengerjakannya dan timestamp-nya.
+7. **Tailors (`tailors`)**: Menyimpan data detail penjahit/pekerja produksi secara spesifik (seperti spesialisasi jahitan dan status ketersediaan), melengkapi entitas `users`.
+8. **Garment Categories (`garment_categories`)**: Master data kategori pakaian (misal: kemeja, celana, jas, kebaya). Digunakan untuk menstandarisasi pilihan pada order_items.
+9. **Customer Measurements (`customer_measurements`)**: Menyimpan data ukuran badan pelanggan secara lebih terstruktur per bagian tubuh (panjang lengan, lingkar dada, dsb.) dan per kategori pakaian, agar lebih rapi dari sekadar JSON.
+10. **Fabrics (`fabrics`)**: Master data bahan/kain yang tersedia di inventory tailor (nama kain, jenis, warna).
+11. **Fabric Stocks (`fabric_stocks`)**: Menyimpan informasi snapshot stok terkini (sisa jumlah meter kain yang tersedia) dari masing-masing bahan kain (`fabrics`).
+12. **Production Stages (`production_stages`)**: Master data tahapan produksi standar (contoh: potong, jahit, obras, finishing) untuk menstandarisasi pencatatan progres.
+13. **Order Revisions (`order_revisions`)**: Mencatat komplain atau revisi jahitan dari pelanggan setelah pesanan diselesaikan (keterangan cacat, status perbaikan).
 
 ### 3.2 Visualisasi ERD (Entity Relationship Diagram)
 
 ```mermaid
 erDiagram
     USERS ||--o{ ORDERS : "melayani"
-    USERS ||--o{ PRODUCTION_TRACKINGS : "mengerjakan"
+    USERS ||--|| TAILORS : "memiliki profil"
     CUSTOMERS ||--o{ ORDERS : "melakukan"
+    CUSTOMERS ||--o{ CUSTOMER_MEASUREMENTS : "memiliki ukuran"
+    GARMENT_CATEGORIES ||--o{ CUSTOMER_MEASUREMENTS : "referensi ukuran"
     ORDERS ||--|{ ORDER_ITEMS : "terdiri dari"
     ORDERS ||--o{ PAYMENTS : "memiliki riwayat"
     ORDERS ||--o{ PRODUCTION_TRACKINGS : "melewati tahapan"
+    ORDERS ||--o{ ORDER_REVISIONS : "memiliki revisi"
+    GARMENT_CATEGORIES ||--o{ ORDER_ITEMS : "kategori"
+    FABRICS ||--o{ FABRIC_STOCKS : "memiliki stok"
+    FABRICS ||--o{ ORDER_ITEMS : "bahan baku"
+    PRODUCTION_STAGES ||--o{ PRODUCTION_TRACKINGS : "tahap produksi"
+    TAILORS ||--o{ PRODUCTION_TRACKINGS : "dikerjakan oleh"
 
     USERS {
         bigint id PK
@@ -86,12 +101,56 @@ erDiagram
         timestamp updated_at
     }
 
+    TAILORS {
+        bigint id PK
+        bigint user_id FK
+        string specialization
+        boolean is_available
+        timestamp created_at
+        timestamp updated_at
+    }
+
     CUSTOMERS {
         bigint id PK
         string name
         string phone
         text address
-        json measurements
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CUSTOMER_MEASUREMENTS {
+        bigint id PK
+        bigint customer_id FK
+        bigint garment_category_id FK
+        string measurement_key
+        string measurement_value
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    GARMENT_CATEGORIES {
+        bigint id PK
+        string name
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    FABRICS {
+        bigint id PK
+        string name
+        string fabric_type
+        string color
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    FABRIC_STOCKS {
+        bigint id PK
+        bigint fabric_id FK
+        decimal quantity_in_meters
+        timestamp last_restock_date
         timestamp created_at
         timestamp updated_at
     }
@@ -112,6 +171,8 @@ erDiagram
     ORDER_ITEMS {
         bigint id PK
         bigint order_id FK
+        bigint garment_category_id FK
+        bigint fabric_id FK
         string product_type
         text fabric_details
         int quantity
@@ -132,16 +193,36 @@ erDiagram
         timestamp updated_at
     }
 
+    PRODUCTION_STAGES {
+        bigint id PK
+        string stage_name
+        int sequence_order
+        timestamp created_at
+        timestamp updated_at
+    }
+
     PRODUCTION_TRACKINGS {
         bigint id PK
         bigint order_id FK
-        string stage
+        bigint production_stage_id FK
         string status
-        bigint handled_by FK
+        bigint tailor_id FK
         timestamp started_at
         timestamp completed_at
     }
+
+    ORDER_REVISIONS {
+        bigint id PK
+        bigint order_id FK
+        text revision_notes
+        string status
+        timestamp reported_at
+        timestamp resolved_at
+        timestamp created_at
+        timestamp updated_at
+    }
 ```
+
 
 ---
 
