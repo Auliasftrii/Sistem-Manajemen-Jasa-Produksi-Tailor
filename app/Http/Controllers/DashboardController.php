@@ -11,15 +11,32 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalUsers = \App\Models\User::count();
-        $superadminCount = \App\Models\User::where('role', 'Superadmin')->count();
-        $adminCount = \App\Models\User::where('role', 'Admin')->count();
+        $totalPesanan = \App\Models\Order::count();
+        $pelanggan = \App\Models\Customer::count();
+        $pesananBelumSelesai = \App\Models\Order::whereIn('status', ['pending', 'in_progress'])->count();
+        
+        // Pendapatan bulan ini dari payment (total payment yang sukses)
+        $pendapatanBulanIni = \App\Models\Payment::whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
+            ->sum('amount');
+
+        // Data untuk grafik 7 hari terakhir
+        $chartDates = collect(range(6, 0))->map(function($days) {
+            return now()->subDays($days)->format('Y-m-d');
+        });
+
+        $chartData = $chartDates->map(function($date) {
+            return \App\Models\Payment::whereDate('payment_date', $date)->sum('amount');
+        });
 
         return view('dashboard.index', [
             'title' => 'Dashboard',
-            'totalUsers' => $totalUsers,
-            'superadminCount' => $superadminCount,
-            'adminCount' => $adminCount,
+            'totalPesanan' => $totalPesanan,
+            'pelanggan' => $pelanggan,
+            'pesananBelumSelesai' => $pesananBelumSelesai,
+            'pendapatanBulanIni' => $pendapatanBulanIni,
+            'chartDates' => $chartDates->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))->toArray(),
+            'chartData' => $chartData->toArray(),
         ]);
     }
 

@@ -277,6 +277,46 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('customer.*') ? '' : 'collapsed' }}"
+                    href="{{ route('customer.index') }}">
+                    <i class='bx bx-user-circle'></i>
+                    <span>Pelanggan</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('order.*') ? '' : 'collapsed' }}"
+                    href="{{ route('order.index') }}">
+                    <i class='bx bx-cart'></i>
+                    <span>Pesanan</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('production.*') ? '' : 'collapsed' }}"
+                    href="{{ route('production.index') }}">
+                    <i class='bx bx-list-check'></i>
+                    <span>Pelacakan Produksi</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('payment.*') ? '' : 'collapsed' }}"
+                    href="{{ route('payment.index') }}">
+                    <i class='bx bx-credit-card'></i>
+                    <span>Pembayaran</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('report.*') ? '' : 'collapsed' }}"
+                    href="{{ route('report.index') }}">
+                    <i class='bx bx-file'></i>
+                    <span>Laporan</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('setting.*') ? '' : 'collapsed' }}"
                     href="{{ route('setting.index') }}">
                     <i class='bx bx-cog'></i>
