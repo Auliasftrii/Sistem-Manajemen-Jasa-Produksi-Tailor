@@ -24,6 +24,11 @@ class UserSeeder extends Seeder
                 'email' => 'admin@gmail.com',
                 'role' => 'Admin',
             ],
+            [
+                'name' => 'Budi Penjahit',
+                'email' => 'pegawai@gmail.com',
+                'role' => 'Pegawai',
+            ],
         ];
 
         foreach ($users as $user) {
@@ -37,5 +42,8 @@ class UserSeeder extends Seeder
                 'role' => $user['role'],
             ]);
         }
+        
+        // Add additional dummy users to reach minimal 5 data
+        User::factory(3)->create(['role' => 'Pegawai']);
     }
 }
