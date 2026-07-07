@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('/user', UserController::class)->middleware('role:Superadmin');
     Route::resource('/customer', App\Http\Controllers\CustomerController::class);
     Route::resource('/order', App\Http\Controllers\OrderController::class);
+    Route::resource('/production', App\Http\Controllers\ProductionTrackingController::class)->only(['index', 'edit', 'update']);
 
     Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
     Route::put('/setting/{setting}/update', [SettingController::class, 'update'])->name('setting.update');
