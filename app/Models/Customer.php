@@ -10,12 +10,10 @@ class Customer extends Model
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
     use HasFactory;
     
-    protected $fillable = ['name', 'phone', 'address', 'measurements'];
+    protected $fillable = ['name', 'phone', 'address'];
 
-    protected function casts(): array
+    public function measurements()
     {
-        return [
-            'measurements' => 'array',
-        ];
+        return $this->hasMany(CustomerMeasurement::class);
     }
 }

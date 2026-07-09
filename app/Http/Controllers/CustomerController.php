@@ -19,6 +19,7 @@ class CustomerController extends Controller
     {
         return view('customer.create', [
             'title' => 'Create Customer',
+            'garmentCategories' => \App\Models\GarmentCategory::all(),
         ]);
     }
 
@@ -28,22 +29,45 @@ class CustomerController extends Controller
             'name' => 'required',
             'phone' => 'nullable',
             'address' => 'nullable',
-            'measurements' => 'nullable|array'
+            'measurements' => 'nullable|array' // structure: measurements[garment_id][key] = value
         ], [
             'name.required' => 'Nama wajib diisi',
             'measurements.array' => 'Format ukuran tidak valid',
         ]);
 
+        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            Customer::create($validate);
+            $customer = Customer::create([
+                'name' => $validate['name'],
+                'phone' => $validate['phone'] ?? null,
+                'address' => $validate['address'] ?? null,
+            ]);
+
+            if (!empty($validate['measurements'])) {
+                foreach ($validate['measurements'] as $garmentId => $measurements) {
+                    foreach ($measurements as $key => $value) {
+                        if (!empty($key) && !empty($value)) {
+                            $customer->measurements()->create([
+                                'garment_category_id' => $garmentId,
+                                'measurement_key' => $key,
+                                'measurement_value' => $value,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
             return to_route('customer.index')->withSuccess('Data pelanggan berhasil ditambahkan');
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
             return to_route('customer.create')->withError('Gagal menambahkan data: ' . $e->getMessage());
         }
     }
 
     public function show(Customer $customer)
     {
+        $customer->load('measurements.garmentCategory');
         return view('customer.show', [
             'title' => 'Detail Customer',
             'customer' => $customer,
@@ -52,9 +76,11 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer)
     {
+        $customer->load('measurements.garmentCategory');
         return view('customer.edit', [
             'title' => 'Edit Customer',
             'customer' => $customer,
+            'garmentCategories' => \App\Models\GarmentCategory::all(),
         ]);
     }
 
@@ -70,10 +96,35 @@ class CustomerController extends Controller
             'measurements.array' => 'Format ukuran tidak valid',
         ]);
 
+        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            $customer->update($validate);
+            $customer->update([
+                'name' => $validate['name'],
+                'phone' => $validate['phone'] ?? null,
+                'address' => $validate['address'] ?? null,
+            ]);
+
+            // Clear old measurements
+            $customer->measurements()->delete();
+
+            if (!empty($validate['measurements'])) {
+                foreach ($validate['measurements'] as $garmentId => $measurements) {
+                    foreach ($measurements as $key => $value) {
+                        if (!empty($key) && !empty($value)) {
+                            $customer->measurements()->create([
+                                'garment_category_id' => $garmentId,
+                                'measurement_key' => $key,
+                                'measurement_value' => $value,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
             return to_route('customer.index')->withSuccess('Data pelanggan berhasil diubah');
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
             return to_route('customer.edit', $customer)->withError('Gagal mengubah data: ' . $e->getMessage());
         }
     }

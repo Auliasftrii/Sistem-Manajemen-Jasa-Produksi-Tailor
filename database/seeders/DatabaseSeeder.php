@@ -18,10 +18,15 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             SettingSeeder::class,
+            GarmentCategorySeeder::class,
             CustomerSeeder::class,
+            TailorSeeder::class,
             OrderSeeder::class,
+            ProductionStageSeeder::class,
             ProductionTrackingSeeder::class,
             PaymentSeeder::class,
+            OrderRevisionSeeder::class,
+            FabricSeeder::class,
         ]);
     }
 }

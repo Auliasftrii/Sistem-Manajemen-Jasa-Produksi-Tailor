@@ -44,4 +44,9 @@ class User extends Authenticatable
     {
         return $this->role === 'Pegawai';
     }
+
+    public function tailor()
+    {
+        return $this->hasOne(Tailor::class);
+    }
 }

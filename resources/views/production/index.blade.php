@@ -33,7 +33,8 @@
                             <td>
                                 @php
                                     $completedCount = $order->trackings->where('status', 'completed')->count();
-                                    $totalStages = 4; // Pola, Potong, Jahit, Finishing
+                                    $totalStages = \App\Models\ProductionStage::count();
+                                    $totalStages = $totalStages > 0 ? $totalStages : 1; // avoid div by zero
                                     $percentage = ($completedCount / $totalStages) * 100;
                                 @endphp
                                 <div class="progress" style="height: 20px;">

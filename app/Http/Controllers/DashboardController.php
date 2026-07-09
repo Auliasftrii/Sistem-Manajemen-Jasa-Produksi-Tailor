@@ -11,33 +11,145 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalPesanan = \App\Models\Order::count();
-        $pelanggan = \App\Models\Customer::count();
-        $pesananBelumSelesai = \App\Models\Order::whereIn('status', ['pending', 'in_progress'])->count();
-        
-        // Pendapatan bulan ini dari payment (total payment yang sukses)
-        $pendapatanBulanIni = \App\Models\Payment::whereMonth('payment_date', now()->month)
-            ->whereYear('payment_date', now()->year)
-            ->sum('amount');
+        $user = Auth::user();
+        $role = $user->role;
 
-        // Data untuk grafik 7 hari terakhir
-        $chartDates = collect(range(6, 0))->map(function($days) {
-            return now()->subDays($days)->format('Y-m-d');
-        });
+        // Data khusus per Role
+        if ($role == 'Superadmin') {
+            $totalPesanan = \App\Models\Order::count();
+            $pelanggan = \App\Models\Customer::count();
+            $pesananBelumSelesai = \App\Models\Order::whereIn('status', ['pending', 'in_progress'])->count();
+            
+            $pendapatanBulanIni = \App\Models\Payment::whereMonth('payment_date', now()->month)
+                ->whereYear('payment_date', now()->year)
+                ->sum('amount');
 
-        $chartData = $chartDates->map(function($date) {
-            return \App\Models\Payment::whereDate('payment_date', $date)->sum('amount');
-        });
+            // Chart Data: Pendapatan 7 hari terakhir (Aggregate Query)
+            $startDate = now()->subDays(6)->startOfDay();
+            $endDate = now()->endOfDay();
+            
+            $payments = \App\Models\Payment::select(
+                DB::raw('DATE(payment_date) as date'),
+                DB::raw('SUM(amount) as total')
+            )
+            ->whereBetween('payment_date', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
 
-        return view('dashboard.index', [
-            'title' => 'Dashboard',
-            'totalPesanan' => $totalPesanan,
-            'pelanggan' => $pelanggan,
-            'pesananBelumSelesai' => $pesananBelumSelesai,
-            'pendapatanBulanIni' => $pendapatanBulanIni,
-            'chartDates' => $chartDates->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))->toArray(),
-            'chartData' => $chartData->toArray(),
-        ]);
+            $chartDates = [];
+            $chartData = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $dateStr = now()->subDays($i)->format('Y-m-d');
+                $chartDates[] = \Carbon\Carbon::parse($dateStr)->format('d M');
+                $chartData[] = $payments->has($dateStr) ? (float) $payments[$dateStr] : 0;
+            }
+
+            return view('dashboard.index', [
+                'title' => 'Dashboard Superadmin',
+                'role' => $role,
+                'totalPesanan' => $totalPesanan,
+                'pelanggan' => $pelanggan,
+                'pesananBelumSelesai' => $pesananBelumSelesai,
+                'pendapatanBulanIni' => $pendapatanBulanIni,
+                'chartDates' => $chartDates,
+                'chartData' => $chartData,
+                'chartName' => 'Pendapatan (Rp)',
+            ]);
+        } 
+        elseif ($role == 'Admin') {
+            $totalPesanan = \App\Models\Order::count();
+            $pesananBaru = \App\Models\Order::where('status', 'pending')->count();
+            $komplainAktif = \App\Models\OrderRevision::whereIn('status', ['Pending', 'In Progress'])->count();
+            $stokKain = \App\Models\FabricStock::sum('quantity_in_meters');
+
+            // Chart Data: Pesanan baru 7 hari terakhir (Aggregate Query)
+            $startDate = now()->subDays(6)->startOfDay();
+            $endDate = now()->endOfDay();
+
+            $orders = \App\Models\Order::select(
+                DB::raw('DATE(order_date) as date'),
+                DB::raw('COUNT(id) as total')
+            )
+            ->whereBetween('order_date', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
+
+            $chartDates = [];
+            $chartData = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $dateStr = now()->subDays($i)->format('Y-m-d');
+                $chartDates[] = \Carbon\Carbon::parse($dateStr)->format('d M');
+                $chartData[] = $orders->has($dateStr) ? (float) $orders[$dateStr] : 0;
+            }
+
+            return view('dashboard.index', [
+                'title' => 'Dashboard Admin',
+                'role' => $role,
+                'totalPesanan' => $totalPesanan,
+                'pesananBaru' => $pesananBaru,
+                'komplainAktif' => $komplainAktif,
+                'stokKain' => $stokKain,
+                'chartDates' => $chartDates,
+                'chartData' => $chartData,
+                'chartName' => 'Total Pesanan (Order)',
+            ]);
+        } 
+        else {
+            // Pegawai (Tailor)
+            $tailor = $user->tailor;
+            $tugasSaya = 0;
+            $tugasSelesai = 0;
+            $tugasBelumSelesai = 0;
+            
+            $chartDates = [];
+            $chartData = [];
+
+            if ($tailor) {
+                $tugasSaya = \App\Models\ProductionTracking::where('tailor_id', $tailor->id)->count();
+                $tugasSelesai = \App\Models\ProductionTracking::where('tailor_id', $tailor->id)->where('status', 'completed')->count();
+                $tugasBelumSelesai = \App\Models\ProductionTracking::where('tailor_id', $tailor->id)->whereIn('status', ['pending', 'in_progress'])->count();
+                
+                // Chart Data: Tugas diselesaikan 7 hari terakhir (Aggregate Query)
+                $startDate = now()->subDays(6)->startOfDay();
+                $endDate = now()->endOfDay();
+
+                $tasks = \App\Models\ProductionTracking::select(
+                    DB::raw('DATE(completed_at) as date'),
+                    DB::raw('COUNT(id) as total')
+                )
+                ->where('tailor_id', $tailor->id)
+                ->where('status', 'completed')
+                ->whereBetween('completed_at', [$startDate, $endDate])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->pluck('total', 'date');
+
+                for ($i = 6; $i >= 0; $i--) {
+                    $dateStr = now()->subDays($i)->format('Y-m-d');
+                    $chartDates[] = \Carbon\Carbon::parse($dateStr)->format('d M');
+                    $chartData[] = $tasks->has($dateStr) ? (float) $tasks[$dateStr] : 0;
+                }
+            } else {
+                for ($i = 6; $i >= 0; $i--) {
+                    $dateStr = now()->subDays($i)->format('Y-m-d');
+                    $chartDates[] = \Carbon\Carbon::parse($dateStr)->format('d M');
+                    $chartData[] = 0;
+                }
+            }
+
+            return view('dashboard.index', [
+                'title' => 'Dashboard Pegawai',
+                'role' => $role,
+                'tugasSaya' => $tugasSaya,
+                'tugasSelesai' => $tugasSelesai,
+                'tugasBelumSelesai' => $tugasBelumSelesai,
+                'chartDates' => $chartDates,
+                'chartData' => $chartData,
+                'chartName' => 'Tugas Diselesaikan',
+            ]);
+        }
     }
 
     public function show()

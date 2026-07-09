@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\ProductionTracking;
+use App\Models\ProductionStage;
+use App\Models\Tailor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +14,7 @@ class ProductionTrackingController extends Controller
     public function index()
     {
         // Get orders that are not cancelled, sort by order_date
-        $orders = Order::with('trackings.handler', 'customer')
+        $orders = Order::with('trackings.tailor.user', 'customer', 'trackings.productionStage')
             ->where('status', '!=', 'cancelled')
             ->latest()
             ->get();
@@ -25,26 +27,27 @@ class ProductionTrackingController extends Controller
 
     public function edit(Order $production) // actually $production is the Order instance passing in route
     {
-        $production->load('trackings.handler', 'items');
+        $production->load('trackings.tailor.user', 'items', 'trackings.productionStage');
         
         // Ensure default trackings exist
-        $stages = ['Pola', 'Potong', 'Jahit', 'Finishing'];
+        $stages = ProductionStage::orderBy('sequence_order')->get();
         
         foreach ($stages as $stage) {
-            if (!$production->trackings->where('stage', $stage)->first()) {
+            if (!$production->trackings->where('production_stage_id', $stage->id)->first()) {
                 ProductionTracking::create([
                     'order_id' => $production->id,
-                    'stage' => $stage,
+                    'production_stage_id' => $stage->id,
                     'status' => 'pending'
                 ]);
             }
         }
         
-        $production->load('trackings.handler'); // reload
+        $production->load('trackings.tailor.user', 'trackings.productionStage'); // reload
 
         return view('production.edit', [
             'title' => 'Update Status Produksi',
-            'order' => $production
+            'order' => $production,
+            'tailors' => Tailor::with('user')->get(),
         ]);
     }
 
@@ -54,17 +57,20 @@ class ProductionTrackingController extends Controller
             'trackings' => 'required|array',
             'trackings.*.id' => 'required|exists:production_trackings,id',
             'trackings.*.status' => 'required|in:pending,in_progress,completed',
+            'trackings.*.tailor_id' => 'nullable|exists:tailors,id',
         ]);
 
         foreach ($request->trackings as $trackingData) {
             $tracking = ProductionTracking::find($trackingData['id']);
             
-            // Only update if status changed
+            $data = [];
+            if (isset($trackingData['tailor_id'])) {
+                $data['tailor_id'] = $trackingData['tailor_id'];
+            }
+
+            // Update timestamps only if status changed
             if ($tracking->status != $trackingData['status']) {
-                $data = [
-                    'status' => $trackingData['status'],
-                    'handled_by' => Auth::id() ?? 1,
-                ];
+                $data['status'] = $trackingData['status'];
 
                 if ($trackingData['status'] == 'in_progress' && !$tracking->started_at) {
                     $data['started_at'] = now();
@@ -73,7 +79,9 @@ class ProductionTrackingController extends Controller
                 if ($trackingData['status'] == 'completed' && !$tracking->completed_at) {
                     $data['completed_at'] = now();
                 }
+            }
 
+            if (!empty($data)) {
                 $tracking->update($data);
             }
         }

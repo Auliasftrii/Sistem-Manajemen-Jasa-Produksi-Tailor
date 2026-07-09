@@ -43,30 +43,53 @@
                     <div id="measurements-container">
                         <!-- Dynamic inputs will be added here -->
                         @php
-                            $measurements = old('measurements', $customer->measurements ?? []);
+                            $measurementsData = [];
+                            if (old('measurements')) {
+                                $measurementsData = old('measurements');
+                            } else {
+                                foreach ($customer->measurements as $m) {
+                                    $measurementsData[$m->garment_category_id][$m->measurement_key] = $m->measurement_value;
+                                }
+                            }
                         @endphp
 
-                        @forelse($measurements as $key => $val)
-                            <div class="row mb-2 measurement-row">
-                                <div class="col-5">
-                                    <input type="text" class="form-control measurement-key" value="{{ $key }}" placeholder="Bagian (ex: Lingkar Dada)">
+                        @forelse($measurementsData as $garmentId => $meas)
+                            @foreach($meas as $key => $val)
+                                <div class="row mb-2 measurement-row">
+                                    <div class="col-4">
+                                        <select class="form-select measurement-category">
+                                            @foreach($garmentCategories as $cat)
+                                                <option value="{{ $cat->id }}" @selected($cat->id == $garmentId)>{{ $cat->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="text" class="form-control measurement-key" value="{{ $key }}" placeholder="Bagian">
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="text" class="form-control measurement-val" value="{{ $val }}" placeholder="Nilai (ex: 90 cm)">
+                                    </div>
+                                    <div class="col-1">
+                                        <button type="button" class="btn btn-danger btn-sm btn-remove-measurement"><i class="bx bx-trash"></i></button>
+                                    </div>
                                 </div>
-                                <div class="col-5">
-                                    <input type="text" class="form-control measurement-val" value="{{ $val }}" placeholder="Nilai (ex: 90 cm)">
-                                </div>
-                                <div class="col-2">
-                                    <button type="button" class="btn btn-danger btn-sm btn-remove-measurement"><i class="bx bx-trash"></i></button>
-                                </div>
-                            </div>
+                            @endforeach
                         @empty
                             <div class="row mb-2 measurement-row">
-                                <div class="col-5">
-                                    <input type="text" class="form-control measurement-key" placeholder="Bagian (ex: Lingkar Dada)">
+                                <div class="col-4">
+                                    <select class="form-select measurement-category">
+                                        @foreach($garmentCategories as $cat)
+                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="col-5">
+                                <div class="col-3">
+                                    <input type="text" class="form-control measurement-key" placeholder="Bagian">
+                                </div>
+                                <div class="col-4">
                                     <input type="text" class="form-control measurement-val" placeholder="Nilai (ex: 90 cm)">
                                 </div>
-                                <div class="col-2">
+                                <div class="col-1">
                                     <button type="button" class="btn btn-danger btn-sm btn-remove-measurement"><i class="bx bx-trash"></i></button>
                                 </div>
                             </div>
@@ -89,15 +112,25 @@
         <script>
             $(document).ready(function() {
                 $('#add-measurement').click(function() {
+                    let categoryOptions = '';
+                    @foreach($garmentCategories as $cat)
+                        categoryOptions += `<option value="{{ $cat->id }}">{{ $cat->name }}</option>`;
+                    @endforeach
+
                     const row = `
                         <div class="row mb-2 measurement-row">
-                            <div class="col-5">
-                                <input type="text" class="form-control measurement-key" placeholder="Bagian (ex: Lingkar Dada)">
+                            <div class="col-4">
+                                <select class="form-select measurement-category">
+                                    ${categoryOptions}
+                                </select>
                             </div>
-                            <div class="col-5">
+                            <div class="col-3">
+                                <input type="text" class="form-control measurement-key" placeholder="Bagian">
+                            </div>
+                            <div class="col-4">
                                 <input type="text" class="form-control measurement-val" placeholder="Nilai (ex: 90 cm)">
                             </div>
-                            <div class="col-2">
+                            <div class="col-1">
                                 <button type="button" class="btn btn-danger btn-sm btn-remove-measurement"><i class="bx bx-trash"></i></button>
                             </div>
                         </div>
@@ -112,10 +145,11 @@
                 // Update name attribute based on key before submit
                 $('form').submit(function() {
                     $('.measurement-row').each(function() {
+                        let garmentId = $(this).find('.measurement-category').val();
                         let key = $(this).find('.measurement-key').val();
                         let valInput = $(this).find('.measurement-val');
                         if (key && key.trim() !== '') {
-                            valInput.attr('name', 'measurements[' + key.trim() + ']');
+                            valInput.attr('name', 'measurements[' + garmentId + '][' + key.trim() + ']');
                         }
                     });
                 });

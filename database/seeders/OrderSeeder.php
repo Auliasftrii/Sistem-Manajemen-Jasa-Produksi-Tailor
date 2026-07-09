@@ -15,7 +15,12 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         // Buat 10 order
-        Order::factory(10)->create()->each(function ($order) {
+        for ($i = 0; $i < 10; $i++) {
+            $order = Order::factory()->create([
+                // Distribusikan tanggal order ke 7 hari terakhir secara acak atau berurutan
+                'order_date' => now()->subDays(rand(0, 6)),
+            ]);
+
             // Setiap order punya 1 sampai 3 items
             $items = OrderItem::factory(rand(1, 3))->create([
                 'order_id' => $order->id
@@ -25,6 +30,6 @@ class OrderSeeder extends Seeder
             $order->update([
                 'total_amount' => $items->sum('subtotal')
             ]);
-        });
+        }
     }
 }

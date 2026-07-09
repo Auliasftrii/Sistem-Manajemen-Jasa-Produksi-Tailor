@@ -42,4 +42,19 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            if ($user->role === 'Pegawai') {
+                $user->tailor()->create([
+                    'specialization' => fake()->randomElement(['Kemeja', 'Celana', 'Jas', 'Kebaya']),
+                    'is_available' => fake()->boolean(80),
+                ]);
+            }
+        });
+    }
 }

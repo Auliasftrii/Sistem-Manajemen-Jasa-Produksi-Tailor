@@ -68,7 +68,11 @@ class UserController extends Controller
 
             $validate['password'] = bcrypt($request->password);
             $validate['email_verified_at'] = now();
-            User::create($validate);
+            $user = User::create($validate);
+
+            if ($user->role === 'Pegawai') {
+                $user->tailor()->create([]);
+            }
 
             DB::commit();
             return to_route('user.index')->withSuccess('Data berhasil ditambahkan');
@@ -137,12 +141,18 @@ class UserController extends Controller
                 }
             }
 
-            if ($user->password) {
+            if ($request->password) {
                 $validate['password'] = bcrypt($request->password);
             } else {
                 unset($validate['password']);
             }
             $user->update($validate);
+
+            if ($user->role === 'Pegawai') {
+                $user->tailor()->firstOrCreate([]);
+            } else {
+                $user->tailor()->delete();
+            }
 
             DB::commit();
             return to_route('user.index')->withSuccess('Data berhasil diubah');

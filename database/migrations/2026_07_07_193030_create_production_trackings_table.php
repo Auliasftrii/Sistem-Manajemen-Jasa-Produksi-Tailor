@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('production_trackings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->string('stage'); // misal: Pola, Potong, Jahit, Finishing
+            $table->foreignId('production_stage_id')->constrained()->cascadeOnDelete();
             $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
-            $table->foreignId('handled_by')->nullable()->constrained('users')->nullOnDelete(); // user_id penjahit
+            $table->foreignId('tailor_id')->nullable()->constrained('tailors')->nullOnDelete();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();

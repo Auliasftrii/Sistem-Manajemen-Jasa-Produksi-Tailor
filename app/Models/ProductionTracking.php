@@ -12,9 +12,9 @@ class ProductionTracking extends Model
 
     protected $fillable = [
         'order_id',
-        'stage',
+        'production_stage_id',
         'status',
-        'handled_by',
+        'tailor_id',
         'started_at',
         'completed_at',
     ];
@@ -24,8 +24,13 @@ class ProductionTracking extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function handler()
+    public function productionStage()
     {
-        return $this->belongsTo(User::class, 'handled_by');
+        return $this->belongsTo(ProductionStage::class);
+    }
+
+    public function tailor()
+    {
+        return $this->belongsTo(Tailor::class);
     }
 }

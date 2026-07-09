@@ -48,37 +48,48 @@
                     @method('put')
 
                     <div class="row row-cols-1 row-cols-md-2 g-4">
-                        @foreach(['Pola', 'Potong', 'Jahit', 'Finishing'] as $stage)
-                            @php
-                                $tracking = $order->trackings->where('stage', $stage)->first();
-                            @endphp
-                            @if($tracking)
-                                <div class="col">
-                                    <div class="card h-100 border-{{ $tracking->status == 'completed' ? 'success' : ($tracking->status == 'in_progress' ? 'primary' : 'warning') }}">
-                                        <div class="card-header fw-bold bg-light">
-                                            Tahap: {{ $stage }}
+                        @php
+                            // Sort trackings by stage sequence_order
+                            $sortedTrackings = $order->trackings->sortBy(function($t) {
+                                return $t->productionStage->sequence_order;
+                            });
+                        @endphp
+                        @foreach($sortedTrackings as $tracking)
+                            <div class="col">
+                                <div class="card h-100 border-{{ $tracking->status == 'completed' ? 'success' : ($tracking->status == 'in_progress' ? 'primary' : 'warning') }}">
+                                    <div class="card-header fw-bold bg-light">
+                                        Tahap: {{ $tracking->productionStage->stage_name }}
+                                    </div>
+                                    <div class="card-body">
+                                        <input type="hidden" name="trackings[{{ $loop->index }}][id]" value="{{ $tracking->id }}">
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Penjahit (Tailor)</label>
+                                            <select class="form-select" name="trackings[{{ $loop->index }}][tailor_id]">
+                                                <option value="">-- Belum Ditentukan --</option>
+                                                @foreach($tailors as $tailor)
+                                                    <option value="{{ $tailor->id }}" @selected($tracking->tailor_id == $tailor->id)>{{ $tailor->user->name }} ({{ $tailor->specialization ?? 'Umum' }})</option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        <div class="card-body">
-                                            <input type="hidden" name="trackings[{{ $loop->index }}][id]" value="{{ $tracking->id }}">
-                                            
-                                            <div class="mb-3">
-                                                <label class="form-label">Status Pekerjaan</label>
-                                                <select class="form-select" name="trackings[{{ $loop->index }}][status]">
-                                                    <option value="pending" @selected($tracking->status == 'pending')>Pending (Menunggu)</option>
-                                                    <option value="in_progress" @selected($tracking->status == 'in_progress')>In Progress (Dikerjakan)</option>
-                                                    <option value="completed" @selected($tracking->status == 'completed')>Completed (Selesai)</option>
-                                                </select>
-                                            </div>
 
-                                            <div class="small text-muted mt-3">
-                                                <div><strong>Dikerjakan oleh:</strong> {{ $tracking->handler->name ?? '-' }}</div>
-                                                <div><strong>Mulai:</strong> {{ $tracking->started_at ? \Carbon\Carbon::parse($tracking->started_at)->format('d/m/Y H:i') : '-' }}</div>
-                                                <div><strong>Selesai:</strong> {{ $tracking->completed_at ? \Carbon\Carbon::parse($tracking->completed_at)->format('d/m/Y H:i') : '-' }}</div>
-                                            </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Status Pekerjaan</label>
+                                            <select class="form-select" name="trackings[{{ $loop->index }}][status]">
+                                                <option value="pending" @selected($tracking->status == 'pending')>Pending (Menunggu)</option>
+                                                <option value="in_progress" @selected($tracking->status == 'in_progress')>In Progress (Dikerjakan)</option>
+                                                <option value="completed" @selected($tracking->status == 'completed')>Completed (Selesai)</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="small text-muted mt-3">
+                                            <div><strong>Dikerjakan oleh:</strong> {{ $tracking->tailor->user->name ?? '-' }}</div>
+                                            <div><strong>Mulai:</strong> {{ $tracking->started_at ? \Carbon\Carbon::parse($tracking->started_at)->format('d/m/Y H:i') : '-' }}</div>
+                                            <div><strong>Selesai:</strong> {{ $tracking->completed_at ? \Carbon\Carbon::parse($tracking->completed_at)->format('d/m/Y H:i') : '-' }}</div>
                                         </div>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
                         @endforeach
                     </div>
 

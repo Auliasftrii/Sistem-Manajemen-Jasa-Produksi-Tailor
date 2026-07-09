@@ -18,7 +18,7 @@ class PaymentSeeder extends Seeder
         $orders = Order::where('status', '!=', 'cancelled')->take(5)->get();
 
         if ($orders->count() >= 5) {
-            // 3 transaksi lunas
+            // 3 transaksi lunas (kita distribusikan tanggal pelunasan ke 7 hari terakhir agar grafik muncul bagus)
             for ($i = 0; $i < 3; $i++) {
                 $order = $orders[$i];
                 
@@ -27,7 +27,7 @@ class PaymentSeeder extends Seeder
                 Payment::create([
                     'order_id' => $order->id,
                     'amount' => $dpAmount,
-                    'payment_date' => $order->order_date,
+                    'payment_date' => now()->subDays(6 - $i), // Distribusi hari
                     'payment_method' => 'Cash',
                     'status' => 'DP'
                 ]);
@@ -36,7 +36,7 @@ class PaymentSeeder extends Seeder
                 Payment::create([
                     'order_id' => $order->id,
                     'amount' => $order->total_amount - $dpAmount,
-                    'payment_date' => now(),
+                    'payment_date' => now()->subDays(5 - $i), // Distribusi hari
                     'payment_method' => 'Transfer Bank',
                     'status' => 'Pelunasan'
                 ]);
@@ -50,7 +50,7 @@ class PaymentSeeder extends Seeder
                 Payment::create([
                     'order_id' => $order->id,
                     'amount' => $dpAmount,
-                    'payment_date' => $order->order_date,
+                    'payment_date' => now()->subDays(4 - $i), // Distribusi hari
                     'payment_method' => 'Cash',
                     'status' => 'DP'
                 ]);

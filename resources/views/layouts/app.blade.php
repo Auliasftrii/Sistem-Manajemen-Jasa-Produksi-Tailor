@@ -296,6 +296,14 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('revision.*') ? '' : 'collapsed' }}"
+                    href="{{ route('revision.index') }}">
+                    <i class='bx bx-edit-alt'></i>
+                    <span>Revisi Pesanan</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('production.*') ? '' : 'collapsed' }}"
                     href="{{ route('production.index') }}">
                     <i class='bx bx-cut'></i>
@@ -324,6 +332,24 @@
                     href="{{ route('setting.index') }}">
                     <i class='bx bx-slider-alt'></i>
                     <span>Setting</span>
+                </a>
+            </li>
+
+            <li class="nav-heading mt-3 mb-1 text-muted fw-bold small text-uppercase px-3">Master Data</li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('garment-category.*') ? '' : 'collapsed' }}"
+                    href="{{ route('garment-category.index') }}">
+                    <i class='bx bx-category'></i>
+                    <span>Kategori Pakaian</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fabric.*') ? '' : 'collapsed' }}"
+                    href="{{ route('fabric.index') }}">
+                    <i class='bx bx-layer'></i>
+                    <span>Kain & Stok</span>
                 </a>
             </li>
 

@@ -20,13 +20,20 @@ class CustomerFactory extends Factory
             'name' => fake()->name(),
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
-            'measurements' => [
-                'Lingkar Dada' => fake()->numberBetween(80, 120),
-                'Lingkar Pinggang' => fake()->numberBetween(70, 110),
-                'Panjang Baju' => fake()->numberBetween(60, 80),
-                'Panjang Lengan' => fake()->numberBetween(20, 65),
-                'Lebar Bahu' => fake()->numberBetween(35, 55),
-            ],
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\Customer $customer) {
+            $categories = \App\Models\GarmentCategory::inRandomOrder()->take(rand(1, 2))->get();
+            foreach ($categories as $cat) {
+                $customer->measurements()->createMany([
+                    ['garment_category_id' => $cat->id, 'measurement_key' => 'Lingkar Dada', 'measurement_value' => fake()->numberBetween(80, 120)],
+                    ['garment_category_id' => $cat->id, 'measurement_key' => 'Lingkar Pinggang', 'measurement_value' => fake()->numberBetween(70, 110)],
+                    ['garment_category_id' => $cat->id, 'measurement_key' => 'Panjang Baju', 'measurement_value' => fake()->numberBetween(60, 80)],
+                ]);
+            }
+        });
     }
 }

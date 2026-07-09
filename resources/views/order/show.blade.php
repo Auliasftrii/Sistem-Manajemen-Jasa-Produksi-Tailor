@@ -4,7 +4,12 @@
         <div class="col-12">
             <h4>
                 <i class="bx bx-receipt"></i> INVOICE
-                <small class="float-end">Tanggal: {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</small>
+                <div class="float-end">
+                    <small>Tanggal: {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</small>
+                    @if($order->status == 'completed')
+                        <a href="{{ route('revision.create', ['order_id' => $order->id]) }}" class="btn btn-sm btn-outline-warning ms-2"><i class="bx bx-error"></i> Buat Komplain</a>
+                    @endif
+                </div>
             </h4>
         </div>
         <!-- /.col -->
@@ -47,6 +52,26 @@
         <!-- /.col -->
     </div>
     <!-- /.row -->
+
+    @if($order->revisions->count() > 0)
+        <div class="row mt-3">
+            <div class="col-12">
+                @php
+                    $unresolved = $order->revisions->where('status', '!=', 'Resolved')->count();
+                @endphp
+                @if($unresolved > 0)
+                    <div class="alert alert-warning">
+                        <i class="bx bx-error"></i> Terdapat <strong>{{ $unresolved }}</strong> komplain/revisi yang belum diselesaikan (Pending / In Progress).
+                        <a href="{{ route('revision.index') }}" class="alert-link">Lihat Detail Revisi</a>
+                    </div>
+                @else
+                    <div class="alert alert-success">
+                        <i class="bx bx-check-circle"></i> Semua komplain/revisi telah diselesaikan (Resolved).
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
 
     <!-- Table row -->
     <div class="row mt-4">

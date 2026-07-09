@@ -15,47 +15,42 @@ class ProductionTrackingSeeder extends Seeder
      */
     public function run(): void
     {
-        $orders = Order::all();
-        $pegawai = User::where('role', 'Pegawai')->first();
-        
-        $stages = ['Pola', 'Potong', 'Jahit', 'Finishing'];
+        $orders = \App\Models\Order::all();
+        $stages = \App\Models\ProductionStage::orderBy('sequence_order')->get();
+        $tailors = \App\Models\Tailor::all();
 
-        foreach ($orders as $order) {
-            // For half of the orders, add tracking logic
-            if (rand(0, 1) == 1) {
-                foreach ($stages as $index => $stage) {
-                    $status = 'pending';
-                    $started = null;
-                    $completed = null;
-                    $handler = null;
-                    
-                    if ($index < 2) {
-                        $status = 'completed';
-                        $started = now()->subDays(2);
-                        $completed = now()->subDay(1);
-                        $handler = $pegawai ? $pegawai->id : 1;
-                    } elseif ($index == 2) {
-                        $status = 'in_progress';
-                        $started = now();
-                        $handler = $pegawai ? $pegawai->id : 1;
-                    }
-                    
-                    ProductionTracking::create([
+        if ($orders->count() > 0 && $stages->count() > 0 && $tailors->count() > 0) {
+            foreach ($orders as $index => $order) {
+                // Untuk contoh, selesaikan 2 tahap pertama dari setiap order
+                $completedStages = $stages->take(2);
+
+                foreach ($completedStages as $stageIndex => $stage) {
+                    $tailor = $tailors->random();
+                    // Distribusi hari acak untuk grafik Pegawai
+                    $completionDate = now()->subDays(rand(0, 6)); 
+
+                    \App\Models\ProductionTracking::create([
                         'order_id' => $order->id,
-                        'stage' => $stage,
-                        'status' => $status,
-                        'handled_by' => $handler,
-                        'started_at' => $started,
-                        'completed_at' => $completed,
+                        'production_stage_id' => $stage->id,
+                        'tailor_id' => $tailor->id,
+                        'status' => 'completed',
+                        'started_at' => $completionDate->copy()->subHours(2), // 2 jam sebelumnya
+                        'completed_at' => $completionDate
                     ]);
                 }
-            } else {
-                // Initialize as pending for all
-                foreach ($stages as $stage) {
-                    ProductionTracking::create([
+
+                // Tambahkan 1 tahap on-progress
+                if ($stages->count() > 2) {
+                    $stage = $stages[2];
+                    $tailor = $tailors->random();
+                    
+                    \App\Models\ProductionTracking::create([
                         'order_id' => $order->id,
-                        'stage' => $stage,
-                        'status' => 'pending'
+                        'production_stage_id' => $stage->id,
+                        'tailor_id' => $tailor->id,
+                        'status' => 'in_progress',
+                        'started_at' => now(),
+                        'completed_at' => null
                     ]);
                 }
             }
