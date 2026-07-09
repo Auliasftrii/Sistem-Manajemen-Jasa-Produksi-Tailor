@@ -40,16 +40,131 @@
     <style>
         :root {
             /* ====== UBAH WARNA TEMA DI SINI ====== */
-            --theme-bg: #5C4033;
-            /* Coklat Tua */
-            --theme-hover: #3E2A21;
-            /* Coklat Lebih Gelap untuk efek hover */
-            --theme-text: #FDFBF7;
-            /* Krem Terang / Putih */
-            --main-bg: #F5F5DC;
-            /* Krem Halus untuk background halaman */
+            --theme-bg: #5C4033; /* Coklat Tua */
+            --theme-hover: #3E2A21; /* Coklat Lebih Gelap untuk efek hover */
+            --theme-text: #FDFBF7; /* Krem Terang / Putih */
+            --main-bg: linear-gradient(135deg, #EFEEF3, #E6E4EC); /* Soft gradient background */
             /* ===================================== */
         }
+
+        /* --- DASHBOARD SOFT-UI UTILITIES --- */
+        .soft-card {
+            background-color: #FFFFFF !important;
+            border-radius: 24px !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06) !important;
+            border: none !important;
+            padding: 1.5rem;
+        }
+
+        .soft-card-interactive {
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            cursor: pointer;
+        }
+
+        .soft-card-interactive:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+        }
+
+        .hero-number {
+            color: #1A1A1E !important;
+            font-weight: 700 !important;
+            font-size: 36px !important;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .soft-label {
+            color: #9E9CA8 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            font-size: 12px !important;
+            font-weight: 600;
+        }
+
+        .badge-success-soft {
+            background-color: #D4F547 !important;
+            color: #1A1A1E !important;
+            border-radius: 50rem !important;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-pending-soft {
+            background-color: #F3F0FA !important;
+            color: #6B6875 !important;
+            border-radius: 50rem !important;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .text-currency {
+            color: #F97316 !important;
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, #8B5CF6, #EC4899) !important;
+            color: #FFFFFF !important;
+            border-radius: 24px !important;
+            box-shadow: 0 8px 30px rgba(236, 72, 153, 0.3) !important;
+            border: none !important;
+            padding: 2rem;
+        }
+
+        .action-card .hero-number, .action-card .soft-label {
+            color: #FFFFFF !important;
+        }
+
+        .btn-pill-cta {
+            background-color: #FFFFFF !important;
+            color: #8B5CF6 !important;
+            border-radius: 50rem !important;
+            font-weight: bold;
+            padding: 10px 24px;
+            border: none;
+            transition: transform 0.2s;
+        }
+        
+        .btn-pill-cta:hover {
+            transform: scale(1.05);
+        }
+
+        /* Circular Progress styling */
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 80%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #eee;
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 2.8;
+            stroke-linecap: round;
+            animation: progress 1s ease-out forwards;
+        }
+        @keyframes progress {
+            0% {
+                stroke-dasharray: 0 100;
+            }
+        }
+        .percentage {
+            fill: #1A1A1E;
+            font-family: sans-serif;
+            font-size: 0.5em;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+        
+        /* ---------------------------------- */
 
         label.required::after {
             content: " *";
@@ -75,7 +190,7 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            background-color: var(--main-bg) !important;
+            background: var(--main-bg) !important;
         }
 
         #main {
