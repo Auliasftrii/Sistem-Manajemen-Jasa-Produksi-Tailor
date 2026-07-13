@@ -13,6 +13,10 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/', [LoginController::class, 'index'])->name('login');
     Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('login.authenticate');
+    
+    // Public Order Tracking
+    Route::get('/lacak-pesanan', [\App\Http\Controllers\OrderTrackingController::class, 'index'])->name('tracking.index');
+    Route::post('/lacak-pesanan', [\App\Http\Controllers\OrderTrackingController::class, 'search'])->name('tracking.search')->middleware('throttle:5,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -38,6 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/fabric', App\Http\Controllers\FabricController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('/fabric/{fabric}/stock', [App\Http\Controllers\FabricController::class, 'addStock'])->name('fabric.addStock');
 
-    Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
-    Route::put('/setting/{setting}/update', [SettingController::class, 'update'])->name('setting.update');
+    Route::middleware('role:Admin')->group(function () {
+        Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
+        Route::put('/setting/{setting}/update', [SettingController::class, 'update'])->name('setting.update');
+    });
 });

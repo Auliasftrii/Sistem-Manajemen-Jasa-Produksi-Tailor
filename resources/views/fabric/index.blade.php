@@ -36,66 +36,73 @@
                                 </form>
                             </td>
                         </tr>
-
-                        <!-- Restock Modal -->
-                        <div class="modal fade" id="restockModal{{ $fabric->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form action="{{ route('fabric.addStock', $fabric) }}" method="post" class="modal-content">
-                                    @csrf
-                                    <div class="modal-header bg-success text-white">
-                                        <h5 class="modal-title">Tambah Stok Kain: {{ $fabric->name }}</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Jumlah Stok Masuk (Meter) *</label>
-                                            <input type="number" step="0.1" name="quantity_in_meters" class="form-control" required placeholder="Contoh: 50.5">
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-success">Simpan Stok</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Edit Modal -->
-                        <div class="modal fade" id="editModal{{ $fabric->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form action="{{ route('fabric.update', $fabric) }}" method="post" class="modal-content">
-                                    @csrf
-                                    @method('put')
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Edit Kain</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Nama Kain *</label>
-                                            <input type="text" name="name" class="form-control" value="{{ $fabric->name }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Jenis Kain *</label>
-                                            <input type="text" name="fabric_type" class="form-control" value="{{ $fabric->fabric_type }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Warna *</label>
-                                            <input type="text" name="color" class="form-control" value="{{ $fabric->color }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     @endforeach
                 </tbody>
             </table>
         </div>
     </div>
+
+    @foreach ($fabrics as $fabric)
+        <!-- Restock Modal -->
+        <div class="modal fade" id="restockModal{{ $fabric->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form action="{{ route('fabric.addStock', $fabric) }}" method="post" class="modal-content">
+                    @csrf
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Tambah Stok Kain: {{ $fabric->name }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Jumlah Stok Masuk (Meter) *</label>
+                            <input type="number" step="0.1" name="quantity_in_meters" class="form-control" required placeholder="Contoh: 50.5">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Simpan Stok</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal{{ $fabric->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form action="{{ route('fabric.update', $fabric) }}" method="post" class="modal-content">
+                    @csrf
+                    @method('put')
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Kain</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Kain *</label>
+                            <input type="text" name="name" class="form-control" value="{{ $fabric->name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Jenis Kain *</label>
+                            <input type="text" name="fabric_type" class="form-control" value="{{ $fabric->fabric_type }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Warna *</label>
+                            <input type="text" name="color" class="form-control" value="{{ $fabric->color }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Jumlah Stok (Meter) *</label>
+                            <input type="number" step="0.1" name="quantity_in_meters" class="form-control" value="{{ $fabric->stocks_sum_quantity_in_meters ?? 0 }}" required min="0">
+                            <small class="text-muted">Ubah angka ini untuk menyesuaikan total stok.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
 
     <!-- Create Modal -->
     <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
@@ -118,6 +125,10 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Warna *</label>
                         <input type="text" name="color" class="form-control" required placeholder="Contoh: Putih Tulang">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Stok Awal (Meter) *</label>
+                        <input type="number" step="0.1" name="quantity_in_meters" class="form-control" required min="0" placeholder="Contoh: 100">
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -104,6 +104,11 @@
         </div>
 
         <div class="footer">
+            <div style="border: 1px dashed #000; padding: 10px; margin-bottom: 20px; text-align: center;">
+                <strong>🔍 Pantau Progres Pesanan Anda Secara Online!</strong><br>
+                Buka link: <strong>{{ url('/lacak-pesanan') }}</strong><br>
+                Masukkan No. Invoice <strong>{{ $order->invoice_number }}</strong>.
+            </div>
             <p>Terima kasih atas kepercayaannya. Kami menunggu kedatangan Anda kembali!</p>
             <p>--- Dokumen ini digenerate secara otomatis oleh sistem ---</p>
         </div>

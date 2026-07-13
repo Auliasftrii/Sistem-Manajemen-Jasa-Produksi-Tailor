@@ -23,9 +23,19 @@ class FabricController extends Controller
             'name' => 'required|string|max:255',
             'fabric_type' => 'required|string|max:255',
             'color' => 'required|string|max:255',
+            'quantity_in_meters' => 'required|numeric|min:0',
         ]);
 
-        Fabric::create($request->all());
+        $fabric = Fabric::create($request->only(['name', 'fabric_type', 'color']));
+        
+        if ($request->quantity_in_meters > 0) {
+            FabricStock::create([
+                'fabric_id' => $fabric->id,
+                'quantity_in_meters' => $request->quantity_in_meters,
+                'last_restock_date' => now()->toDateString(),
+            ]);
+        }
+        
         return back()->withSuccess('Data kain berhasil ditambahkan.');
     }
 
@@ -35,9 +45,23 @@ class FabricController extends Controller
             'name' => 'required|string|max:255',
             'fabric_type' => 'required|string|max:255',
             'color' => 'required|string|max:255',
+            'quantity_in_meters' => 'required|numeric|min:0',
         ]);
 
-        $fabric->update($request->all());
+        $fabric->update($request->only(['name', 'fabric_type', 'color']));
+        
+        $currentStock = $fabric->stocks()->sum('quantity_in_meters');
+        $newStock = $request->quantity_in_meters;
+        $diff = $newStock - $currentStock;
+        
+        if ($diff != 0) {
+            FabricStock::create([
+                'fabric_id' => $fabric->id,
+                'quantity_in_meters' => $diff,
+                'last_restock_date' => now()->toDateString(),
+            ]);
+        }
+        
         return back()->withSuccess('Data kain berhasil diperbarui.');
     }
 

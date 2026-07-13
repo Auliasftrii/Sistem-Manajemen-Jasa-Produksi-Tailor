@@ -172,6 +172,11 @@
                         Sign In to Dashboard
                     </button>
 
+                    <a href="{{ route('tracking.index') }}"
+                        class="mt-4 w-full flex justify-center py-3.5 px-4 border border-brand-200 rounded-xl text-sm font-semibold text-brand-600 bg-white hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all duration-200">
+                        Lacak Pesanan Saya
+                    </a>
+
                     <div class="text-center mt-8">
                         <p class="text-xs text-gray-400 font-medium">
                             {{ $setting->copyright ?? '© ' . date('Y') . ' All rights reserved.' }}

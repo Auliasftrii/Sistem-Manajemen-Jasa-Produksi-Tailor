@@ -13,14 +13,27 @@ class ProductionTrackingController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        $isPegawai = $user->role !== 'Superadmin' && $user->role !== 'Admin';
+
         // Get orders that are not cancelled, sort by order_date
-        $orders = Order::with('trackings.tailor.user', 'customer', 'trackings.productionStage')
-            ->where('status', '!=', 'cancelled')
-            ->latest()
-            ->get();
+        $query = Order::with('trackings.tailor.user', 'customer', 'trackings.productionStage')
+            ->where('status', '!=', 'cancelled');
+
+        if ($isPegawai && $user->tailor) {
+            $tailorId = $user->tailor->id;
+            $query->whereHas('trackings', function($q) use ($tailorId) {
+                $q->where('tailor_id', $tailorId);
+            });
+            $title = 'Tugas Saya';
+        } else {
+            $title = 'Pelacakan Produksi';
+        }
+
+        $orders = $query->latest()->get();
 
         return view('production.index', [
-            'title' => 'Pelacakan Produksi',
+            'title' => $title,
             'orders' => $orders,
         ]);
     }

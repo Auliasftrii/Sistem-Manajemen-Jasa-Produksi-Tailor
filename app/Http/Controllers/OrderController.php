@@ -112,15 +112,20 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $request->validate([
+            'order_date' => 'required|date',
             'expected_completion_date' => 'nullable|date',
-            'status' => 'required|in:pending,in_progress,completed,cancelled',
         ]);
 
         try {
+            // Update the dates
             $order->update([
+                'order_date' => $request->order_date,
                 'expected_completion_date' => $request->expected_completion_date,
-                'status' => $request->status,
             ]);
+
+            // Sync the status automatically
+            $order->syncStatus();
+
             return to_route('order.index')->withSuccess('Pesanan berhasil diperbarui.');
         } catch (\Exception $e) {
             return to_route('order.edit', $order)->withError('Gagal memperbarui pesanan: ' . $e->getMessage());

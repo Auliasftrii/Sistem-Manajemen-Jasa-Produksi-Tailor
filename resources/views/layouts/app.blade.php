@@ -442,13 +442,15 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('setting.*') ? '' : 'collapsed' }}"
-                    href="{{ route('setting.index') }}">
-                    <i class='bx bx-slider-alt'></i>
-                    <span>Setting</span>
-                </a>
-            </li>
+            @if (in_array(Auth::user()->role, ['Superadmin', 'Admin']))
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('setting.*') ? '' : 'collapsed' }}"
+                        href="{{ route('setting.index') }}">
+                        <i class='bx bx-slider-alt'></i>
+                        <span>Setting</span>
+                    </a>
+                </li>
+            @endif
 
             <li class="nav-heading mt-3 mb-1 text-muted fw-bold small text-uppercase px-3">Master Data</li>
 

@@ -37,22 +37,24 @@
                                 @endif
                             </td>
                             <td>
-                                <form action="{{ route('revision.update', $revision) }}" method="post" class="d-inline-block">
-                                    @csrf
-                                    @method('put')
-                                    <div class="input-group input-group-sm" style="width: 200px;">
-                                        <select name="status" class="form-select" onchange="this.form.submit()">
-                                            <option value="Pending" @selected($revision->status == 'Pending')>Pending</option>
-                                            <option value="In Progress" @selected($revision->status == 'In Progress')>In Progress</option>
-                                            <option value="Resolved" @selected($revision->status == 'Resolved')>Resolved</option>
-                                        </select>
-                                    </div>
-                                </form>
-                                <form action="{{ route('revision.destroy', $revision) }}" method="post" class="d-inline-block ms-1" onsubmit="return confirm('Yakin ingin menghapus revisi ini?')">
-                                    @csrf
-                                    @method('delete')
-                                    <button type="submit" class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
-                                </form>
+                                <div class="d-flex align-items-center gap-2">
+                                    <form action="{{ route('revision.update', $revision) }}" method="post" class="m-0">
+                                        @csrf
+                                        @method('put')
+                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                            <select name="status" class="form-select" onchange="this.form.submit()">
+                                                <option value="Pending" @selected($revision->status == 'Pending')>Pending</option>
+                                                <option value="In Progress" @selected($revision->status == 'In Progress')>In Progress</option>
+                                                <option value="Resolved" @selected($revision->status == 'Resolved')>Resolved</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                    <form action="{{ route('revision.destroy', $revision) }}" method="post" class="m-0" onsubmit="return confirm('Yakin ingin menghapus revisi ini?')">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="submit" class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

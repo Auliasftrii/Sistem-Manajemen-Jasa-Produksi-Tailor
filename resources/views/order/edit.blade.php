@@ -32,27 +32,28 @@
                 </div>
 
                 <div class="col-md-6">
-                    <h5 class="mb-3">Update Status</h5>
-                    
+                    <h5 class="mb-3">Update Status & Tanggal</h5>
+
+                    <div class="mb-3">
+                        <label for="order_date" class="form-label required">Tanggal Pesan</label>
+                        <input type="date" class="form-control @error('order_date') is-invalid @enderror" id="order_date" name="order_date" value="{{ old('order_date', $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('Y-m-d') : '') }}" required>
+                        @error('order_date')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="mb-3">
                         <label for="expected_completion_date" class="form-label">Perkiraan Selesai</label>
-                        <input type="date" class="form-control @error('expected_completion_date') is-invalid @enderror" id="expected_completion_date" name="expected_completion_date" value="{{ old('expected_completion_date', $order->expected_completion_date) }}">
+                        <input type="date" class="form-control @error('expected_completion_date') is-invalid @enderror" id="expected_completion_date" name="expected_completion_date" value="{{ old('expected_completion_date', $order->expected_completion_date ? \Carbon\Carbon::parse($order->expected_completion_date)->format('Y-m-d') : '') }}">
                         @error('expected_completion_date')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label for="status" class="form-label required">Status Pesanan</label>
-                        <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
-                            <option value="pending" @selected(old('status', $order->status) == 'pending')>Pending</option>
-                            <option value="in_progress" @selected(old('status', $order->status) == 'in_progress')>In Progress</option>
-                            <option value="completed" @selected(old('status', $order->status) == 'completed')>Completed</option>
-                            <option value="cancelled" @selected(old('status', $order->status) == 'cancelled')>Cancelled</option>
-                        </select>
-                        @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <label for="status" class="form-label">Status Pesanan</label>
+                        <input type="text" class="form-control" id="status" value="{{ ucfirst(str_replace('_', ' ', $order->status)) }}" readonly disabled>
+                        <small class="text-muted d-block mt-1">Status pesanan otomatis mengikuti progres di Pelacakan Produksi.</small>
                     </div>
                 </div>
             </div>

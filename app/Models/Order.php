@@ -49,4 +49,35 @@ class Order extends Model
     {
         return $this->hasMany(OrderRevision::class);
     }
+
+    public function syncStatus()
+    {
+        $newStatus = 'pending';
+        $trackings = $this->trackings;
+        $totalStages = \App\Models\ProductionStage::count();
+
+        if ($trackings->count() > 0) {
+            $completedCount = 0;
+            $anyStarted = false;
+
+            foreach ($trackings as $tracking) {
+                if ($tracking->started_at) {
+                    $anyStarted = true;
+                }
+                if ($tracking->completed_at) {
+                    $completedCount++;
+                }
+            }
+
+            if ($completedCount === $totalStages && $totalStages > 0) {
+                $newStatus = 'completed';
+            } elseif ($anyStarted) {
+                $newStatus = 'in_progress';
+            }
+        }
+
+        if ($this->status !== $newStatus) {
+            $this->updateQuietly(['status' => $newStatus]);
+        }
+    }
 }

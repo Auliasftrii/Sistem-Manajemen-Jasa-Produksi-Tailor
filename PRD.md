@@ -19,9 +19,10 @@ Membangun aplikasi web berbasis Laravel untuk mendigitalisasi proses bisnis penj
 - Pembuatan laporan pendapatan dan produktivitas pegawai.
 
 ### 1.3 Target Pengguna
-- **Superadmin / Pemilik Usaha:** Mengelola seluruh akses pengguna, laporan keuangan, dan memantau keseluruhan bisnis.
-- **Admin / Kasir:** Melayani pelanggan, memasukkan data pesanan baru, ukuran badan pelanggan, serta memproses pembayaran.
-- **Pegawai / Penjahit:** Memperbarui status produksi yang menjadi tanggung jawabnya (misalnya: status pemotongan, penjahitan, atau penyelesaian).
+- **Superadmin:** Mengelola seluruh akses pengguna (akses penuh seluruh sistem), laporan keuangan, dan memantau keseluruhan bisnis.
+- **Admin:** Mengelola pesanan, produksi, pembayaran, master data.
+- **Pegawai:** Mengerjakan dan memperbarui progres produksi yang ditugaskan.
+- **Pelanggan:** Aktor eksternal (bukan role login sistem) yang dapat melacak status pesanannya secara mandiri melalui halaman publik menggunakan Nomor Invoice, tanpa perlu membuat akun.
 
 ---
 
@@ -42,6 +43,7 @@ Membangun aplikasi web berbasis Laravel untuk mendigitalisasi proses bisnis penj
 4. **Pelacakan Produksi (Production Tracking)**
    - Fitur Kanban atau daftar tahapan produksi.
    - Status tahapan meliputi: *Pending*, *Pemotongan (Cutting)*, *Penjahitan (Sewing)*, *Finishing*, dan *Siap Diambil*.
+   - **Pelacakan Pesanan Publik (tanpa login):** Pelanggan dapat memantau progres pesanan secara mandiri dengan memasukkan Nomor Invoice.
 
 5. **Manajemen Pembayaran (Payment & Invoicing)**
    - Pencatatan pembayaran Bertahap (DP / *Down Payment*) dan Pelunasan.
@@ -55,7 +57,7 @@ Membangun aplikasi web berbasis Laravel untuk mendigitalisasi proses bisnis penj
 ## 3. Arsitektur Sistem & Skema Data
 
 ### 3.1 Penjelasan Naratif
-Sistem ini dibangun menggunakan kerangka kerja (framework) **Laravel 11** dengan pendekatan **MVC (Model-View-Controller)**. Basis data yang digunakan adalah **SQLite** (dapat diskalakan ke MySQL untuk produksi). Antarmuka pengguna (UI) menggunakan template **Bootstrap NiceAdmin**.
+Sistem ini dibangun menggunakan kerangka kerja (framework) **Laravel 13** dengan pendekatan **MVC (Model-View-Controller)**. Basis data yang digunakan adalah **SQLite** (dapat diskalakan ke MySQL untuk produksi). Antarmuka pengguna (UI) menggunakan template **Bootstrap NiceAdmin**.
 
 **Skema Basis Data utama terdiri dari entitas berikut:**
 1. **Users (`users`)**: Menyimpan data kredensial pegawai dan admin. Tabel ini memiliki kolom `role` untuk membedakan hak akses.
@@ -63,8 +65,8 @@ Sistem ini dibangun menggunakan kerangka kerja (framework) **Laravel 11** dengan
 3. **Orders (`orders`)**: Tabel induk untuk transaksi pesanan. Terhubung dengan `customers` dan `users` (admin yang melayani). Berisi total tagihan, tanggal pesanan, dan tanggal target selesai.
 4. **Order Items (`order_items`)**: Tabel detail dari pesanan. Satu pesanan dapat memiliki banyak pakaian. Menyimpan jenis pakaian, detail kain, kuantitas, dan harga satuan.
 5. **Payments (`payments`)**: Melacak riwayat pembayaran dari sebuah pesanan. Satu pesanan bisa dicicil (DP dan Pelunasan).
-6. **Production Trackings (`production_trackings`)**: Tabel log tahapan produksi. Setiap kali status pakaian berpindah, log akan dicatat beserta penjahit (`tailor_id`) yang mengerjakannya dan timestamp-nya.
-7. **Tailors (`tailors`)**: Menyimpan data detail penjahit/pekerja produksi secara spesifik (seperti spesialisasi jahitan dan status ketersediaan), melengkapi entitas `users`.
+6. **Production Trackings (`production_trackings`)**: Tabel log tahapan produksi. Setiap kali status pakaian berpindah, log akan dicatat beserta pegawai (`tailor_id`) yang mengerjakannya dan timestamp-nya.
+7. **Tailors (`tailors`)**: Menyimpan data detail pegawai produksi secara spesifik (seperti spesialisasi jahitan dan status ketersediaan), melengkapi entitas `users`.
 8. **Garment Categories (`garment_categories`)**: Master data kategori pakaian (misal: kemeja, celana, jas, kebaya). Digunakan untuk menstandarisasi pilihan pada order_items.
 9. **Customer Measurements (`customer_measurements`)**: Menyimpan data ukuran badan pelanggan secara lebih terstruktur per bagian tubuh (panjang lengan, lingkar dada, dsb.) dan per kategori pakaian, agar lebih rapi dari sekadar JSON.
 10. **Fabrics (`fabrics`)**: Master data bahan/kain yang tersedia di inventory tailor (nama kain, jenis, warna).
@@ -89,7 +91,7 @@ erDiagram
     FABRICS ||--o{ FABRIC_STOCKS : "memiliki stok"
     FABRICS ||--o{ ORDER_ITEMS : "bahan baku"
     PRODUCTION_STAGES ||--o{ PRODUCTION_TRACKINGS : "tahap produksi"
-    TAILORS ||--o{ PRODUCTION_TRACKINGS : "dikerjakan oleh"
+    TAILORS ||--o{ PRODUCTION_TRACKINGS : "dikerjakan oleh (Pegawai)"
 
     USERS {
         bigint id PK
@@ -228,7 +230,7 @@ erDiagram
 
 ## 4. Rencana Implementasi & Tech Stack
 
-- **Backend:** PHP 8.x, Laravel 11.x
+- **Backend:** PHP 8.x, Laravel 13.x
 - **Frontend:** HTML5, CSS3, JavaScript (Vanilla/jQuery), Bootstrap 5 (NiceAdmin Template)
 - **Database:** SQLite (Development) / MySQL (Production)
 - **Deployment:** VPS / Shared Hosting dengan akses SSH.
@@ -236,6 +238,6 @@ erDiagram
 
 ## 5. Kriteria Penerimaan (Acceptance Criteria)
 1. Admin harus dapat memasukkan ukuran pelanggan secara spesifik dan tidak hilang saat pesanan baru dibuat oleh pelanggan yang sama.
-2. Status produksi harus bisa di-update oleh Pegawai/Penjahit yang ditugaskan, dan perubahan status tersebut terekam dalam tabel `production_trackings`.
+2. Status produksi harus bisa di-update oleh Pegawai yang ditugaskan, dan perubahan status tersebut terekam dalam tabel `production_trackings`.
 3. Sistem mencegah penghapusan data master jika ada data transaksi yang bergantung (Relational Integrity constraint).
 4. Pembuatan faktur (Invoice) dapat dicetak dengan rapi dan menunjukkan riwayat pembayaran.
